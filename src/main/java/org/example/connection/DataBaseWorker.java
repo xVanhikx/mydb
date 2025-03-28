@@ -43,27 +43,26 @@ public class DataBaseWorker {
     }
 
     public int insertUser(User user) {
-        String insertUserSQL = "INSERT INTO users (login, password, date) VALUES (?, ?, ?)";
-        String insertEmailSQL = "INSERT INTO emails (login, email) VALUES (?, ?)";
+        String insertUserSQL = "INSERT INTO users (login, password, date) VALUES (?, ?, ?)\n" +
+                                "INSERT INTO emails (login, email) VALUES (?, ?)";
 
         try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement userStatement = connection.prepareStatement(insertUserSQL);
-             PreparedStatement emailStatement = connection.prepareStatement(insertEmailSQL)) {
+             PreparedStatement userStatement = connection.prepareStatement(insertUserSQL)) {
 
             connection.setAutoCommit(false);
 
             userStatement.setString(1, user.getLogin());
             userStatement.setString(2, user.getPassword());
             userStatement.setDate(3, new java.sql.Date(user.getRegistrationDate().getTime()));
+            userStatement.setString(4, user.getLogin());
+            userStatement.setString(5, user.getEmail());
             int userRows = userStatement.executeUpdate();
 
-            emailStatement.setString(1, user.getLogin());
-            emailStatement.setString(2, user.getEmail());
-            int emailRows = emailStatement.executeUpdate();
+
 
             connection.commit();
 
-            return userRows + emailRows;
+            return userRows;
         } catch (SQLException e) {
             System.err.println("Ошибка при вставке пользователя: " + e.getMessage());
             return 0;
